@@ -27,38 +27,43 @@ public class DashboardFragment extends Fragment {
     private FragmentDashboardBinding binding;
     private FirebaseUser authUser;
 
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         DashboardViewModel dashboardViewModel =
                 new ViewModelProvider(this).get(DashboardViewModel.class);
-
         SharedViewModel sharedViewModel = new ViewModelProvider(
                 requireActivity()
         ).get(SharedViewModel.class);
 
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
-       sharedViewModel.getUser().observe(getViewLifecycleOwner(), firebaseUser -> {
-           authUser = firebaseUser;
-       if (firebaseUser != null){
-           DatabaseReference base = FirebaseDatabase.getInstance().getReference();
-           DatabaseReference users = base.child("users");
-           DatabaseReference uid = users.child(authUser.getUid());
-           DatabaseReference incidencias = uid.child("incidencies");
+        sharedViewModel.getUser().observe(getViewLifecycleOwner(), user -> {
+            authUser = user;
 
-           FirebaseRecyclerOptions<Incidencia> options = new FirebaseRecyclerOptions.Builder<Incidencia>()
-                   .setQuery(incidencias, Incidencia.class)
-                   .setLifecycleOwner(this)
-                   .build();
+            if (user != null) {
+                DatabaseReference base = FirebaseDatabase.getInstance().getReference();
 
-            IncidenciaAdapter adapter = new IncidenciaAdapter(options);
-           binding.rvIncidencies.setAdapter(adapter);
-           binding.rvIncidencies.setLayoutManager(
-           new LinearLayoutManager(requireContext())
+                DatabaseReference users = base.child("users");
+                DatabaseReference uid = users.child(authUser.getUid());
+                DatabaseReference incidencies = uid.child("incidencies");
+
+                FirebaseRecyclerOptions<Incidencia> options = new FirebaseRecyclerOptions.Builder<Incidencia>()
+                        .setQuery(incidencies, Incidencia.class)
+                        .setLifecycleOwner(this)
+                        .build();
+
+                IncidenciaAdapter adapter = new IncidenciaAdapter(options);
+
+                binding.rvIncidencies.setAdapter(adapter);
+                binding.rvIncidencies.setLayoutManager(
+                        new LinearLayoutManager(requireContext())
                 );
 
-       }
 
-       });
+            }
+
+        });
+
 
 
 
@@ -66,26 +71,29 @@ public class DashboardFragment extends Fragment {
         return root;
     }
 
-    class IncidenciaAdapter extends FirebaseRecyclerAdapter<Incidencia, IncidenciaAdapter.IncidenciaViewholder> {
 
+    class IncidenciaAdapter extends FirebaseRecyclerAdapter<Incidencia, IncidenciaAdapter.IncidenciaViewholder> {
         public IncidenciaAdapter(@NonNull FirebaseRecyclerOptions<Incidencia> options) {
             super(options);
         }
 
         @Override
-        protected void onBindViewHolder(@NonNull IncidenciaViewholder holder, int position, @NonNull Incidencia model) {
+        protected void onBindViewHolder(
+                @NonNull IncidenciaViewholder holder, int position, @NonNull Incidencia model
+        ) {
             holder.binding.txtDescripcio.setText(model.getProblema());
             holder.binding.txtAdreca.setText(model.getDireccio());
         }
 
-
         @NonNull
         @Override
-        public IncidenciaViewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType
-            ) {
-            return new IncidenciaViewholder(IncidenciasBinding.inflate(
-                    LayoutInflater.from(parent.getContext()),
-                    parent, false));
+        public IncidenciaViewholder onCreateViewHolder(
+                @NonNull ViewGroup parent, int viewType
+        ) {
+            return new IncidenciaViewholder(IncidenciasBinding
+                    .inflate(
+                            LayoutInflater.from(parent.getContext()),
+                            parent, false));
         }
 
         class IncidenciaViewholder extends RecyclerView.ViewHolder {
@@ -97,9 +105,6 @@ public class DashboardFragment extends Fragment {
             }
         }
     }
-
-
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

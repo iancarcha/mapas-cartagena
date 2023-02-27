@@ -31,14 +31,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-
+import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
+    private ActivityResultLauncher<Intent> signInLauncher;
     private ActivityMainBinding binding;
     private ActivityResultLauncher<String[]> locationPermissionRequest;
+
     private SharedViewModel sharedViewModel;
-    private ActivityResultLauncher<Intent> signInLauncher;
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -57,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
 
         sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
@@ -78,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //firebase
         signInLauncher = registerForActivityResult(
                 new FirebaseAuthUIActivityResultContract(),
                 (result) -> {
@@ -88,6 +90,30 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        Log.e("XXXX", String.valueOf(auth.getCurrentUser()));
+        if (auth.getCurrentUser() == null) {
+            Intent signInIntent =
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setIsSmartLockEnabled(false)
+                            .setAvailableProviders(
+                                    Arrays.asList(
+                                            new AuthUI.IdpConfig.EmailBuilder().build(),
+                                            new AuthUI.IdpConfig.GoogleBuilder().build()
+                                    )
+                            )
+                            .build();
+            signInLauncher.launch(signInIntent);
+        } else {
+            sharedViewModel.setUser(auth.getCurrentUser());
+        }
     }
 
     void checkPermission() {
@@ -106,28 +132,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        Log.e("AAAA", String.valueOf(auth.getCurrentUser()));
-        if (auth.getCurrentUser() == null) {
-            Intent signInIntent =
-                    AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setIsSmartLockEnabled(false)
-                            .setAvailableProviders(
-                                    Arrays.asList(
-                                            new AuthUI.IdpConfig.EmailBuilder().build(),
-                                            new AuthUI.IdpConfig.GoogleBuilder().build()
-                                    )
-                            )
-                            .build();
-            signInLauncher.launch(signInIntent);
-        } else {
-            sharedViewModel.setUser(auth.getCurrentUser());
-        }
-    }
 
 }

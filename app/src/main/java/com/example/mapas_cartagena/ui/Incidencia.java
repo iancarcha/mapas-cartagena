@@ -2,22 +2,15 @@ package com.example.mapas_cartagena.ui;
 
 public class Incidencia {
 
+
     String latitud;
     String longitud;
     String direccio;
     String problema;
-    String url;
-
-    public Incidencia(String latitud, String longitud, String direccio,
-                      String problema, String url) {
-        this.latitud = latitud;
-        this.longitud = longitud;
-        this.direccio = direccio;
-        this.problema = problema;
-        this.url = url;
-    }
+    String Url;
 
     public Incidencia() {
+
     }
 
     public String getLatitud() {
@@ -53,10 +46,19 @@ public class Incidencia {
     }
 
     public String getUrl() {
-        return url;
+        return Url;
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        Url = url;
     }
+
+    public Incidencia(String latitud, String longitud, String direccio, String problema) {
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.direccio = direccio;
+        this.problema = problema;
+    }
+
+
 }
